@@ -69,7 +69,7 @@ public class Buscaminas extends JFrame {
         add(panelSuperior, BorderLayout.NORTH);
     }
 
-    private void inicializarPanelTablero() {
+private void inicializarPanelTablero() {
         panelTablero = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -83,6 +83,9 @@ public class Buscaminas extends JFrame {
 
                 JButton btn = new JButton();
                 btn.setPreferredSize(new Dimension(30, 30));
+                
+                btn.setMargin(new Insets(0, 0, 0, 0)); // Elimina los bordes internos del botón
+                btn.setFont(new Font("Segoe UI Emoji", Font.BOLD, 12)); // Aplica fuente compatible
 
                 final int fila = f;
                 final int col = c;
@@ -139,7 +142,7 @@ public class Buscaminas extends JFrame {
             JOptionPane.showMessageDialog(this, "¡Boom! Has pisado una mina.");
             deshabilitarTablero();
         } else {
-            botones[fila][columna].setText("·");
+            botones[fila][columna].setText("X");
             botones[fila][columna].setEnabled(false);
         }
     }
