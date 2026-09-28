@@ -5,13 +5,21 @@ import java.awt.*;
 
 public class Buscaminas extends JFrame {
 
-    // Configuración del tablero (Constantes: filas, columnas, minas)
+    // Configuración del tablero
     private final int FILAS = 8;
     private final int COLUMNAS = 8;
     private final int MINAS = 10;
-    private final int TIEMPO_MAXIMO_SEGUNDOS = 180; // 3 minutos
+    private final int TIEMPO_MAXIMO_SEGUNDOS = 180;
 
-    // Componentes de la interfaz (Paneles, Labels, Botón de carita)
+    // --- PALETA DE COLORES (MODO OSCURO) ---
+    private final Color COLOR_FONDO_VENTANA = new Color(43, 43, 43);
+    private final Color COLOR_PANEL_SUPERIOR = new Color(60, 63, 65);
+    private final Color COLOR_PANEL_TABLERO  = new Color(51, 51, 51);
+    private final Color COLOR_BOTON_TABLERO  = new Color(70, 73, 75);
+    private final Color COLOR_BORDE_BOTON   = new Color(85, 85, 85);
+    private final Color COLOR_TEXTO_ETIQUETA = new Color(187, 187, 187);
+
+    // Componentes de la interfaz
     private JPanel panelSuperior;
     private JPanel panelTablero;
     private JLabel labelMinas;
@@ -27,40 +35,43 @@ public class Buscaminas extends JFrame {
     private int segundosRestantes;
 
     public Buscaminas() {
-        // Configuración de la ventana principal
         setTitle("Buscaminas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setLayout(new BorderLayout());
 
-        // Inicializar matriz de minas
+        // Fondo principal en modo oscuro
+        getContentPane().setBackground(COLOR_FONDO_VENTANA);
+
         minas = new boolean[FILAS][COLUMNAS];
 
-        // 1. Inicializar componentes superiores (marcadores/carita)
         inicializarPanelSuperior();
-
-        // 2. Inicializar panel del tablero y matriz de botones
         inicializarPanelTablero();
 
-        // 3. Generar minas e iniciar el temporizador de 3 minutos
         generarMinas(MINAS);
         inicializarTimer();
 
-        // 4. Ajustar tamaño de ventana y centrar
         pack();
         setLocationRelativeTo(null);
     }
 
     private void inicializarPanelSuperior() {
         panelSuperior = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        panelSuperior.setBackground(COLOR_PANEL_SUPERIOR);
 
         labelMinas = new JLabel(String.format("%03d", MINAS));
+        labelMinas.setForeground(COLOR_TEXTO_ETIQUETA);
+        labelMinas.setFont(new Font("Consolas", Font.BOLD, 16));
+
         btnCarita = new JButton("🙂");
-        
-        // Listener asignado al botón de carita para reiniciar
+        btnCarita.setBackground(COLOR_BOTON_TABLERO);
+        btnCarita.setForeground(Color.WHITE);
+        btnCarita.setFocusPainted(false);
         btnCarita.addActionListener(e -> reiniciarJuego());
 
         labelTiempo = new JLabel(String.format("%03d", TIEMPO_MAXIMO_SEGUNDOS));
+        labelTiempo.setForeground(COLOR_TEXTO_ETIQUETA);
+        labelTiempo.setFont(new Font("Consolas", Font.BOLD, 16));
 
         panelSuperior.add(labelMinas);
         panelSuperior.add(btnCarita);
@@ -69,8 +80,9 @@ public class Buscaminas extends JFrame {
         add(panelSuperior, BorderLayout.NORTH);
     }
 
-private void inicializarPanelTablero() {
+    private void inicializarPanelTablero() {
         panelTablero = new JPanel(new GridBagLayout());
+        panelTablero.setBackground(COLOR_PANEL_TABLERO);
         GridBagConstraints gbc = new GridBagConstraints();
 
         botones = new JButton[FILAS][COLUMNAS];
@@ -83,9 +95,14 @@ private void inicializarPanelTablero() {
 
                 JButton btn = new JButton();
                 btn.setPreferredSize(new Dimension(30, 30));
+                btn.setMargin(new Insets(0, 0, 0, 0));
+                btn.setFont(new Font("Segoe UI Emoji", Font.BOLD, 12));
                 
-                btn.setMargin(new Insets(0, 0, 0, 0)); // Elimina los bordes internos del botón
-                btn.setFont(new Font("Segoe UI Emoji", Font.BOLD, 12)); // Aplica fuente compatible
+                // Estilo oscuro para los botones
+                btn.setBackground(COLOR_BOTON_TABLERO);
+                btn.setForeground(Color.WHITE);
+                btn.setBorder(BorderFactory.createLineBorder(COLOR_BORDE_BOTON));
+                btn.setFocusPainted(false);
 
                 final int fila = f;
                 final int col = c;
@@ -102,7 +119,6 @@ private void inicializarPanelTablero() {
     private void inicializarTimer() {
         segundosRestantes = TIEMPO_MAXIMO_SEGUNDOS;
         
-        // Ejecuta la acción cada 1000 ms (1 segundo)
         timer = new Timer(1000, e -> {
             segundosRestantes--;
             labelTiempo.setText(String.format("%03d", segundosRestantes));
@@ -137,12 +153,14 @@ private void inicializarPanelTablero() {
     private void alHacerClicEnCasilla(int fila, int columna) {
         if (minas[fila][columna]) {
             botones[fila][columna].setText("💣");
+            botones[fila][columna].setBackground(new Color(180, 50, 50)); // Fondo rojo al explotar
             btnCarita.setText("😵");
             if (timer != null) timer.stop();
             JOptionPane.showMessageDialog(this, "¡Boom! Has pisado una mina.");
             deshabilitarTablero();
         } else {
             botones[fila][columna].setText("X");
+            botones[fila][columna].setBackground(new Color(45, 45, 45)); // Tono más oscuro al revelar
             botones[fila][columna].setEnabled(false);
         }
     }
@@ -155,12 +173,13 @@ private void inicializarPanelTablero() {
         }
     }
 
-    private void reiniciarJuego() {
-        // Resetear matriz de minas y estado de botones
+    private void reiniciarJuego() {   
+             // Resetear matriz de minas y estado de botones
         for (int f = 0; f < FILAS; f++) {
             for (int c = 0; c < COLUMNAS; c++) {
                 minas[f][c] = false;
                 botones[f][c].setText("");
+                botones[f][c].setBackground(COLOR_BOTON_TABLERO);
                 botones[f][c].setEnabled(true);
             }
         }
