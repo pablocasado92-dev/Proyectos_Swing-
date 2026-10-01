@@ -2,15 +2,16 @@ package buscaminas;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Buscaminas extends JFrame {
 
-    private final int FILAS = 8;
-    private final int COLUMNAS = 8;
-    private final int MINAS = 10;
-    private final int TIEMPO_MAXIMO_SEGUNDOS = 180;
+    private static final int FILAS = 8;
+    private static final int COLUMNAS = 8;
+    private static final int MINAS = 10;
+    private static final int TIEMPO_MAXIMO_SEGUNDOS = 180;
 
-    // Colores tema oscuro
     private final Color COLOR_FONDO_OSCURO = new Color(43, 43, 43);
     private final Color COLOR_PANEL_OSCURO = new Color(60, 63, 65);
     private final Color COLOR_TABLERO_OSCURO = new Color(51, 51, 51);
@@ -18,7 +19,6 @@ public class Buscaminas extends JFrame {
     private final Color COLOR_BORDE_OSCURO = new Color(85, 85, 85);
     private final Color COLOR_TEXTO_OSCURO = new Color(187, 187, 187);
 
-    // Colores tema claro
     private final Color COLOR_FONDO_CLARO = new Color(238, 238, 238);
     private final Color COLOR_PANEL_CLARO = new Color(220, 220, 220);
     private final Color COLOR_TABLERO_CLARO = new Color(210, 210, 210);
@@ -26,36 +26,35 @@ public class Buscaminas extends JFrame {
     private final Color COLOR_BORDE_CLARO = new Color(160, 160, 160);
     private final Color COLOR_TEXTO_CLARO = new Color(40, 40, 40);
 
+    private final TableroBuscaminas tablero;
+
     private JMenuBar menuBar;
     private JPanel panelSuperior;
     private JPanel panelTablero;
     private JLabel labelMinas;
     private JLabel labelTiempo;
     private JButton btnCarita;
-
     private JButton[][] botones;
-    private boolean[][] minas;
 
     private Timer timer;
     private int segundosRestantes;
     private boolean temaOscuro = false;
 
     public Buscaminas() {
+        this.tablero = new TableroBuscaminas();
+
         setTitle("Buscaminas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setLayout(new BorderLayout());
 
-        minas = new boolean[FILAS][COLUMNAS];
-
         inicializarPanelSuperior();
         inicializarPanelTablero();
-
-        generarMinas(MINAS);
         inicializarTimer();
         inicializarMenuBar();
 
         aplicarTemaClaro();
+        reiniciarJuego();
 
         pack();
         setLocationRelativeTo(null);
@@ -65,7 +64,6 @@ public class Buscaminas extends JFrame {
         menuBar = new JMenuBar();
 
         JMenu menuTema = new JMenu("Tema");
-
         JMenuItem itemClaro = new JMenuItem("Claro");
         itemClaro.addActionListener(e -> aplicarTemaClaro());
 
@@ -76,7 +74,6 @@ public class Buscaminas extends JFrame {
         menuTema.add(itemOscuro);
 
         JMenu menuAcercaDe = new JMenu("Acerca de");
-
         JMenuItem itemInformacion = new JMenuItem("Información");
         itemInformacion.addActionListener(e -> mostrarAcercaDe());
 
@@ -84,7 +81,6 @@ public class Buscaminas extends JFrame {
 
         menuBar.add(menuTema);
         menuBar.add(menuAcercaDe);
-
         setJMenuBar(menuBar);
     }
 
@@ -111,26 +107,35 @@ public class Buscaminas extends JFrame {
     private void inicializarPanelTablero() {
         panelTablero = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-
         botones = new JButton[FILAS][COLUMNAS];
 
-        for (int f = 0; f < FILAS; f++) {
-            for (int c = 0; c < COLUMNAS; c++) {
-                gbc.gridx = c;
-                gbc.gridy = f;
+        for (int fila = 0; fila < FILAS; fila++) {
+            for (int columna = 0; columna < COLUMNAS; columna++) {
+                gbc.gridx = columna;
+                gbc.gridy = fila;
                 gbc.fill = GridBagConstraints.BOTH;
 
                 JButton btn = new JButton();
-                btn.setPreferredSize(new Dimension(30, 30));
+                btn.setPreferredSize(new Dimension(32, 32));
                 btn.setMargin(new Insets(0, 0, 0, 0));
                 btn.setFont(new Font("Segoe UI Emoji", Font.BOLD, 12));
                 btn.setFocusPainted(false);
 
-                final int fila = f;
-                final int col = c;
-                btn.addActionListener(e -> alHacerClicEnCasilla(fila, col));
+                int filaFinal = fila;
+                int columnaFinal = columna;
 
-                botones[f][c] = btn;
+                btn.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (SwingUtilities.isLeftMouseButton(e)) {
+                            manejarClicIzquierdo(filaFinal, columnaFinal);
+                        } else if (SwingUtilities.isRightMouseButton(e)) {
+                            manejarClicDerecho(filaFinal, columnaFinal);
+                        }
+                    }
+                });
+
+                botones[fila][columna] = btn;
                 panelTablero.add(btn, gbc);
             }
         }
@@ -142,101 +147,126 @@ public class Buscaminas extends JFrame {
         segundosRestantes = TIEMPO_MAXIMO_SEGUNDOS;
 
         timer = new Timer(1000, e -> {
+            if (tablero.isJuegoTerminado()) {
+                timer.stop();
+                return;
+            }
+
             segundosRestantes--;
             labelTiempo.setText(String.format("%03d", segundosRestantes));
 
             if (segundosRestantes <= 0) {
                 timer.stop();
                 btnCarita.setText("😵");
-                JOptionPane.showMessageDialog(this, "¡Se acabó el tiempo! Has perdido.");
-                deshabilitarTablero();
+                tablero.perderJuego();
+                mostrarEstadoJuego("¡Se acabó el tiempo! Has perdido.");
+                renderizarTablero();
             }
         });
-
-        timer.start();
     }
 
-    private void generarMinas(int totalMinas) {
-        int minasColocadas = 0;
-
-        while (minasColocadas < totalMinas) {
-            int fila = (int) (Math.random() * FILAS);
-            int col = (int) (Math.random() * COLUMNAS);
-
-            if (!minas[fila][col]) {
-                minas[fila][col] = true;
-                minasColocadas++;
-            }
+    private void manejarClicIzquierdo(int fila, int columna) {
+        if (tablero.isJuegoTerminado()) {
+            return;
         }
-    }
 
-    private void alHacerClicEnCasilla(int fila, int columna) {
-        if (minas[fila][columna]) {
-            botones[fila][columna].setText("💣");
-            botones[fila][columna].setBackground(new Color(180, 50, 50));
+        boolean revelada = tablero.revelarCasilla(fila, columna);
+        if (!revelada) {
+            return;
+        }
+
+        if (tablero.isVictoria()) {
+            btnCarita.setText("😎");
+            timer.stop();
+            mostrarEstadoJuego("¡Has ganado! Enhorabuena.");
+        } else if (tablero.isJuegoTerminado()) {
             btnCarita.setText("😵");
-
-            if (timer != null) {
-                timer.stop();
-            }
-
-            JOptionPane.showMessageDialog(this, "¡Boom! Has pisado una mina.");
-            deshabilitarTablero();
-        } else {
-            botones[fila][columna].setText("X");
-
-            if (temaOscuro) {
-                botones[fila][columna].setBackground(new Color(45, 45, 45));
-            } else {
-                botones[fila][columna].setBackground(new Color(200, 200, 200));
-            }
-
-            botones[fila][columna].setEnabled(false);
+            timer.stop();
+            mostrarEstadoJuego("¡Boom! Has pisado una mina.");
         }
+
+        renderizarTablero();
     }
 
-    private void deshabilitarTablero() {
-        for (int f = 0; f < FILAS; f++) {
-            for (int c = 0; c < COLUMNAS; c++) {
-                botones[f][c].setEnabled(false);
-            }
+    private void manejarClicDerecho(int fila, int columna) {
+        if (tablero.isJuegoTerminado()) {
+            return;
         }
+
+        boolean banderaCambiada = tablero.alternarBandera(fila, columna);
+        if (!banderaCambiada) {
+            return;
+        }
+
+        actualizarCabecera();
+        renderizarTablero();
     }
 
     private void reiniciarJuego() {
-        for (int f = 0; f < FILAS; f++) {
-            for (int c = 0; c < COLUMNAS; c++) {
-                minas[f][c] = false;
-                botones[f][c].setText("");
-                botones[f][c].setEnabled(true);
-
-                if (temaOscuro) {
-                    botones[f][c].setBackground(COLOR_BOTON_OSCURO);
-                    botones[f][c].setForeground(Color.WHITE);
-                    botones[f][c].setBorder(
-                            BorderFactory.createLineBorder(COLOR_BORDE_OSCURO)
-                    );
-                } else {
-                    botones[f][c].setBackground(COLOR_BOTON_CLARO);
-                    botones[f][c].setForeground(COLOR_TEXTO_CLARO);
-                    botones[f][c].setBorder(
-                            BorderFactory.createLineBorder(COLOR_BORDE_CLARO)
-                    );
-                }
-            }
-        }
-
-        generarMinas(MINAS);
-        labelMinas.setText(String.format("%03d", MINAS));
+        tablero.reiniciar();
+        segundosRestantes = TIEMPO_MAXIMO_SEGUNDOS;
+        btnCarita.setText("🙂");
+        labelTiempo.setText(String.format("%03d", segundosRestantes));
+        actualizarCabecera();
+        renderizarTablero();
 
         if (timer != null) {
             timer.stop();
         }
-
-        segundosRestantes = TIEMPO_MAXIMO_SEGUNDOS;
-        labelTiempo.setText(String.format("%03d", segundosRestantes));
-        btnCarita.setText("🙂");
         timer.start();
+    }
+
+    private void renderizarTablero() {
+        for (int fila = 0; fila < FILAS; fila++) {
+            for (int columna = 0; columna < COLUMNAS; columna++) {
+                JButton boton = botones[fila][columna];
+                boolean revelada = tablero.isRevelada(fila, columna);
+                boolean marcada = tablero.isMarcada(fila, columna);
+
+                if (revelada) {
+                    boton.setEnabled(false);
+                    String texto = tablero.getTextoCasilla(fila, columna);
+                    boton.setText(texto);
+
+                    if (tablero.isMina(fila, columna)) {
+                        boton.setBackground(new Color(180, 50, 50));
+                    } else if (tablero.getNumeroCasilla(fila, columna) > 0) {
+                        boton.setBackground(new Color(200, 200, 200));
+                        boton.setForeground(getColorNumero(tablero.getNumeroCasilla(fila, columna)));
+                    } else {
+                        boton.setBackground(new Color(220, 220, 220));
+                        boton.setForeground(Color.BLACK);
+                    }
+                } else {
+                    boton.setEnabled(true);
+                    boton.setText(marcada ? "🚩" : "");
+                    boton.setBackground(temaOscuro ? COLOR_BOTON_OSCURO : COLOR_BOTON_CLARO);
+                    boton.setForeground(temaOscuro ? Color.WHITE : COLOR_TEXTO_CLARO);
+                }
+
+                boton.setBorder(BorderFactory.createLineBorder(
+                        temaOscuro ? COLOR_BORDE_OSCURO : COLOR_BORDE_CLARO
+                ));
+            }
+        }
+    }
+
+    private void actualizarCabecera() {
+        labelMinas.setText(String.format("%03d", tablero.getMinasRestantes()));
+        labelTiempo.setText(String.format("%03d", segundosRestantes));
+    }
+
+    private Color getColorNumero(int numero) {
+        return switch (numero) {
+            case 1 -> new Color(37, 99, 235);
+            case 2 -> new Color(22, 163, 74);
+            case 3 -> new Color(220, 38, 38);
+            case 4 -> new Color(79, 70, 229);
+            case 5 -> new Color(146, 64, 14);
+            case 6 -> new Color(14, 116, 144);
+            case 7 -> new Color(17, 24, 39);
+            default -> new Color(75, 85, 99);
+        };
     }
 
     private void aplicarTemaClaro() {
@@ -251,11 +281,10 @@ public class Buscaminas extends JFrame {
 
         labelMinas.setForeground(COLOR_TEXTO_CLARO);
         labelTiempo.setForeground(COLOR_TEXTO_CLARO);
-
         btnCarita.setBackground(COLOR_BOTON_CLARO);
         btnCarita.setForeground(COLOR_TEXTO_CLARO);
 
-        reiniciarJuego();
+        renderizarTablero();
     }
 
     private void aplicarTemaOscuro() {
@@ -270,26 +299,28 @@ public class Buscaminas extends JFrame {
 
         labelMinas.setForeground(COLOR_TEXTO_OSCURO);
         labelTiempo.setForeground(COLOR_TEXTO_OSCURO);
-
         btnCarita.setBackground(COLOR_BOTON_OSCURO);
         btnCarita.setForeground(Color.WHITE);
 
-        reiniciarJuego();
+        renderizarTablero();
+    }
+
+    private void mostrarEstadoJuego(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje);
     }
 
     private void mostrarAcercaDe() {
-        JFrame ventana = new JFrame("Acerca de");
-        ventana.setSize(300, 180);
-        ventana.setResizable(false);
-        ventana.setLocationRelativeTo(this);
+        JDialog dialog = new JDialog(this, "Acerca de", true);
+        dialog.setSize(300, 180);
+        dialog.setLocationRelativeTo(this);
+        dialog.setResizable(false);
 
         JLabel texto = new JLabel(
-                "<html><center>Buscaminas<br><br>Proyecto realizado en Java Swing</center></html>",
+                "<html><center>Buscaminas<br><br>Proyecto Java Swing</center></html>",
                 SwingConstants.CENTER
         );
-
-        ventana.add(texto);
-        ventana.setVisible(true);
+        dialog.add(texto, BorderLayout.CENTER);
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {
