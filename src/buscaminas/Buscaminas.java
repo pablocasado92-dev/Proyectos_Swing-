@@ -580,7 +580,7 @@ public class Buscaminas extends JFrame {
     // Sirve para mostrar un pequeño resumen del proyecto y su nombre.
     private void mostrarAcercaDe() {
         JDialog dialog = new JDialog(this, "Acerca de", true);
-        dialog.setSize(300, 180);
+        dialog.setSize(380, 250);
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
 
@@ -589,7 +589,14 @@ public class Buscaminas extends JFrame {
         dialog.getContentPane().setBackground(fondo);
 
         JLabel texto = new JLabel(
-                "<html><center>Buscaminas<br><br>Proyecto Java Swing</center></html>",
+                "<html><center><b>Buscaminas</b><br><br>"
+                        + "Juego creado por Pablo Casado<br><br>"
+                        + "<b>Instrucciones</b><br>"
+                        + "Clic izquierdo: revelar una casilla.<br>"
+                        + "Clic derecho: poner o quitar una bandera.<br>"
+                        + "Los números indican las minas cercanas.<br>"
+                        + "Revela todas las casillas sin minas y evita tocarlas."
+                        + "<br>Tienes 180 segundos para ganar.</center></html>",
                 SwingConstants.CENTER
         );
         texto.setForeground(textoColor);
