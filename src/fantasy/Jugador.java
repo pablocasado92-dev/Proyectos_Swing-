@@ -31,7 +31,7 @@ public class Jugador {
         this.campeonFav = campeonFav;
     }
 
-    // --- Getters y Setters ---
+    // --- Getters ---
 
     public String getNombre() {
         return nombre;
