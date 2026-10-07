@@ -8,7 +8,10 @@ import javax.swing.SwingUtilities;
 public class Fantasy {
 
     public static void main(String[] args) {
-        // Ejecutamos la interfaz dentro del hilo de despacho de eventos de Swing (EDT)
+        // 1. Iniciamos la descarga de imágenes en segundo plano aprovechando el tiempo en la bienvenida
+        VentanaPrincipal.precargarImagenes();
+
+        // 2. Ejecutamos la interfaz dentro del hilo de despacho de eventos de Swing (EDT)
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

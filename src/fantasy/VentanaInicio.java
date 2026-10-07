@@ -22,7 +22,7 @@ public class VentanaInicio extends JFrame {
         // --- 1. CONFIGURACIÓN DE LA VENTANA (TAMAÑO FIJO) ---
         setTitle("LoL Fantasy Manager - Configuración Inicial");
         setSize(520, 480);
-        setResizable(false);                  // Ventana de tamaño fijo
+        setResizable(false);                 
         setLocationRelativeTo(null);         // Centrada en la pantalla
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -36,7 +36,7 @@ public class VentanaInicio extends JFrame {
         panelPrincipal.setBackground(fondoHextech);
         panelPrincipal.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        // --- 2. ZONA NORTE: LOGO LOCAL DEL PROYECTO ---
+        // --- 2. ZONA SUPERIOR: LOGO LOCAL DEL PROYECTO ---
         // Se carga la imagen local desde la carpeta de recursos usando el classpath
         URL urlLogo = getClass().getResource("/fantasy/recursos/logo_fantasy.png");
         JLabel lblLogo;
@@ -97,7 +97,7 @@ public class VentanaInicio extends JFrame {
         cbRegion.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Información de presupuesto inicial
-        JLabel lblPresupuesto = new JLabel("Presupuesto inicial: 100M de Oro Hextech");
+        JLabel lblPresupuesto = new JLabel("Presupuesto inicial: 200M de Oro Hextech");
         lblPresupuesto.setForeground(cianHextech);
         lblPresupuesto.setFont(new Font("Segoe UI", Font.ITALIC, 13));
         lblPresupuesto.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -162,12 +162,12 @@ public class VentanaInicio extends JFrame {
             return;
         }
 
-        // 1. Cerramos la ventana actual liberando sus recursos
-        this.dispose();
-
-        // 2. Abrimos la ventana principal pasando los parámetros (nombre y región)
+        // 1. Abrimos la ventana principal pasando los parámetros (nombre y región)
         VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(nombre, region);
         ventanaPrincipal.setVisible(true);
+
+        // 2. Cerramos la ventana actual liberando sus recursos
+        this.dispose();
     }
 }
 
