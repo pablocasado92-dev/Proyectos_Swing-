@@ -85,7 +85,7 @@ public class VentanaPrincipal extends JFrame {
     }
 
     /**
-     * Construye la barra de menús según los apuntes de Swing.
+     * Construye la barra de menús superior con opciones de juego y ayuda.
      */
     private void crearBarraMenu() {
         JMenuBar barraMenu = new JMenuBar();
@@ -409,7 +409,7 @@ public class VentanaPrincipal extends JFrame {
 
             card.add(Box.createVerticalStrut(3));
 
-            // Botón "Ver Ficha" (enlazará con el JDialog en el paso 4)
+            // Botón para abrir la ficha técnica detallada del jugador en un diálogo modal
             JButton btnVerFicha = new JButton("Ver Ficha");
             btnVerFicha.setFont(new Font("Segoe UI", Font.PLAIN, 10));
             btnVerFicha.setBackground(new Color(30, 50, 80));
@@ -548,15 +548,16 @@ public class VentanaPrincipal extends JFrame {
     }
 
     /**
-     * Muestra la ficha detallada de un jugador utilizando un JDialog de manera simple.
-     * CUMPLE EL REQUISITO: Se instancia directamente un objeto JDialog modal
-     * sin crear ninguna clase que herede de él (sin 'extends JDialog').
+     * Muestra una ventana emergente modal (JDialog) con la información y estadísticas
+     * completas del jugador seleccionado, incluyendo su fotografía ampliada.
+     * 
+     * @param j Jugador a consultar.
      */
     private void mostrarFichaJugador(Jugador j) {
-        // 1. Instanciamos el JDialog directamente en modo modal (true)
+        // 1. Instanciamos el JDialog en modo modal (bloquea la ventana de fondo mientras esté abierto)
         JDialog dialogo = new JDialog(this, "Ficha del Invocador: " + j.getNombre(), true);
         dialogo.setSize(380, 490);
-        dialogo.setResizable(false);         // Control de tamaño fijo
+        dialogo.setResizable(false);         // Tamaño fijo para mantener la estética
         dialogo.setLocationRelativeTo(this); // Centrado sobre la ventana principal
 
         // 2. Panel principal del diálogo con borde y fondo temático

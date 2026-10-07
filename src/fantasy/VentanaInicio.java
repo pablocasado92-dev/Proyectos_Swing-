@@ -42,7 +42,7 @@ public class VentanaInicio extends JFrame {
         JLabel lblLogo;
         if (urlLogo != null) {
             ImageIcon iconoOriginal = new ImageIcon(urlLogo);
-            // Si fuera necesario reescalar proporcionalmente (según apuntes):
+            // Escalado suave para ajustar las dimensiones del banner
             Image imgEscalada = iconoOriginal.getImage().getScaledInstance(380, 100, Image.SCALE_SMOOTH);
             lblLogo = new JLabel(new ImageIcon(imgEscalada));
         } else {
@@ -116,7 +116,7 @@ public class VentanaInicio extends JFrame {
 
         panelPrincipal.add(panelFormulario, BorderLayout.CENTER);
 
-        // --- 4. ZONA SUR: BOTÓN DE ACCIÓN CON DISPOSE() Y PASO DE PARÁMETROS ---
+        // --- 4. ZONA INFERIOR: BOTÓN DE ENTRADA A LA APLICACIÓN ---
         JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panelBoton.setOpaque(false);
 
@@ -128,7 +128,7 @@ public class VentanaInicio extends JFrame {
         btnComenzar.setFocusPainted(false);
         btnComenzar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Evento al pulsar el botón: validación, dispose() y paso de parámetros
+        // Evento al pulsar el botón: validación y navegación a la ventana principal
         btnComenzar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,8 +144,8 @@ public class VentanaInicio extends JFrame {
     }
 
     /**
-     * Valida los campos, cierra la ventana actual con dispose()
-     * y abre la VentanaPrincipal pasando los parámetros introducidos por el usuario.
+     * Valida los datos introducidos, abre la ventana principal con los parámetros
+     * configurados por el usuario y cierra la ventana actual mediante dispose().
      */
     private void iniciarJuego() {
         String nombre = txtNombreClub.getText().trim();

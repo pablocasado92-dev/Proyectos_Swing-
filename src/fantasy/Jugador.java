@@ -64,7 +64,7 @@ public class Jugador {
     /**
      * Devuelve una lista inicial con jugadores profesionales para el mercado de fichajes.
      * Incluye opciones para cada una de las cinco posiciones de LoL (TOP, JGL, MID, ADC, SUP).
-     * Las fotos provienen de URLs públicas de internet (Wikimedia Commons y CDN oficial de Riot).
+     * Las fotografías están alojadas en la nube de Firebase Storage y se descargan mediante sus URLs públicas.
      */
     public static List<Jugador> obtenerListaInicial() {
         List<Jugador> lista = new ArrayList<>();
