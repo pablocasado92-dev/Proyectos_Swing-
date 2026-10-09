@@ -60,7 +60,7 @@ public class VentanaPrincipal extends JFrame {
         // --- 1. CONFIGURACIÓN DEL JFRAME (VENTANA FIJA) ---
         setTitle("LoL Fantasy Manager - " + nombreClub + " [" + region + "]");
         setSize(1040, 750);
-        setResizable(false);                  // Ventana a tamaño fijo
+        setResizable(false);          // Ventana a tamaño fijo
         setLocationRelativeTo(null);         // Centrada en pantalla
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -143,7 +143,7 @@ public class VentanaPrincipal extends JFrame {
         ));
 
         // Izquierda: Nombre del club y región
-        JLabel lblClub = new JLabel("⚔ " + nombreClub + " (" + region + ")");
+        JLabel lblClub = new JLabel(nombreClub + " (" + region + ")");
         lblClub.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblClub.setForeground(COLOR_DORADO);
 
@@ -183,7 +183,7 @@ public class VentanaPrincipal extends JFrame {
         JPanel seccionQuinteto = new JPanel(new BorderLayout(0, 5));
         seccionQuinteto.setOpaque(false);
 
-        JLabel lblTituloQuinteto = new JLabel("★ MI QUINTETO TITULAR (Haz clic en 'Liberar' para recuperar tu oro)", SwingConstants.LEFT);
+        JLabel lblTituloQuinteto = new JLabel("MI QUINTETO TITULAR (Haz clic en 'Liberar' para recuperar tu oro)", SwingConstants.LEFT);
         lblTituloQuinteto.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblTituloQuinteto.setForeground(COLOR_CIAN);
         seccionQuinteto.add(lblTituloQuinteto, BorderLayout.NORTH);
